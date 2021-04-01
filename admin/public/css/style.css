@@ -1,0 +1,29 @@
+h1 {
+    font-size: -webkit-xxx-large;
+}
+footer
+{
+    margin-top: 80px;
+    padding: 20px;
+    text-align: center;
+    background-color: currentColor;
+}
+footer a
+{
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+}
+footer a:first-of-type::after
+{
+    content: " | ";
+    margin: 5px auto;
+    text-align: center;
+}
+.members, .products
+{
+    color:blue;
+    font-size:20px;
+    margin-bottom:20px
+}
