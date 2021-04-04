@@ -26,7 +26,8 @@ $lang = array(
     "SHOW" => "Show",
     "EDIT" => "Edit",
     "Delete" => "Delete",
-    "BACK" => "Back"
+    "BACK" => "Back",
+    "Helloamany" => "Hello Amany"
 );
 // $lang['TITLE']="Admin Panel";
 // $lang['USERNAME']="Enter Your Name";
