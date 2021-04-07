@@ -29,9 +29,10 @@ else
             <table class="table table-striped">
     <thead>
     <tr>
+        <th scope="col"><?php echo $lang['Product Photo']?></th>    
         <th scope="col"><?php echo $lang['ProductName'];?></th>
         <th scope="col"><?php echo $lang['ProductCategory'];?></th>
-        <th scope="col">Product Price</th>
+        <th scope="col"><?php echo $lang['ProductPrice']?></th>
         <th scope="col"><?php echo $lang['CreatedAT'];?></th>
         <th scope="col"><?php echo $lang['CONTROL'];?></th>
     </tr>
@@ -39,6 +40,9 @@ else
     <tbody>
     <?php foreach($products as $product):?>
     <tr>
+        <th scope="row">
+        <img style="height: 15vh;" src="public\image\uploads\products\<?= $product['product_img']?>" alt="<?= $product['product_img']?>">
+        </th>
         <th scope="row"><?= $product['product_name']?></th>
         <td><?= $product['product_category']?></td>
         <td><?= $product['product_price']?></td>
@@ -64,7 +68,7 @@ else
             <div class="container">
                 <h1 class="text-center"><?php echo $lang['AddProducts'];?></h1>
 
-    <form method="post" action="?do=insert">
+    <form method="post" action="?do=insert" enctype="multipart/form-data">
     <div class="mb-3">
         <label for="exampleInputEmail1" class="form-label"><?php echo $lang['ProductName'];?></label>
         <input type="text" class="form-control" name="productName">
@@ -78,8 +82,12 @@ else
         <input type="text" class="form-control" name="productDiscount">
     </div>
     <div class="mb-3">
-        <label class="form-label">Product Price</label>
+        <label class="form-label"><?php echo $lang['ProductPrice']?></label>
         <input type="text" class="form-control" name="productPrice">
+    </div>
+    <div class="mb-3">
+        <label for="formFile" class="form-label">Upload Product Image</label>
+        <input class="form-control" type="file" id="formFile" name="avatar">
     </div>
     <button type="submit" class="btn btn-primary"><?php echo $lang['SUBMIT'];?></button>
 </form>
@@ -89,13 +97,62 @@ else
         <?php 
             if($_SERVER['REQUEST_METHOD']=="POST")
             {
+                $ImageName = $_FILES['avatar']['name'];
+                $ImageType = $_FILES['avatar']['type'];
+                $ImageTmpName = $_FILES['avatar']['tmp_name'];
+                $ImageError = $_FILES['avatar']['error'];
+                $ImageSize = $_FILES['avatar']['size'];
+                $imageAllowedExtension = array("image/jpg" , "image/jpeg" , "image/png");
+                if(in_array($ImageType , $imageAllowedExtension))
+                {
+                    $avatar = rand(0 , 1000)."_".$ImageName;
+                    $destination = "public\image\uploads\products\\".$avatar;
+                    move_uploaded_file($ImageTmpName , $destination);
+                }
                 $productName = $_POST['productName'];
                 $productCategory = $_POST['productCategory'];
                 $productDiscount = $_POST['productDiscount'];
                 $productPrice = $_POST['productPrice'];
-                $stmt = $con -> prepare("INSERT INTO products (product_name,product_category,product_discount,product_price,created_at) VALUES (?,?,?,?,now())");
-                $stmt -> execute(array($productName,$productCategory,$productDiscount,$productPrice));
-                header("location:products.php?do=add");
+                $formErrors = array();
+                if(empty($productName))
+                {
+                    $formErrors[] = "<h1>" . "Please enter the product name" . "</h1>";
+                }
+                elseif(empty($productCategory))
+                {
+                    $formErrors[] = "<h1>" . "Please enter the product category" . "</h1>";
+                }
+                elseif(empty($productDiscount))
+                {
+                    $formErrors[] = "<h1>" . "Please enter the product discount" . "</h1>";
+                }
+                elseif(empty($productPrice))
+                {
+                    $formErrors[] = "<h1>" . "Please enter the product price" . "</h1>";
+                }
+                elseif(empty($avatar))
+                {
+                    $formErrors[] = "<h1>" . "Please upload the product image" . "</h1>";
+                }
+                if(empty($formErrors))
+                {
+                    $stmt = $con -> prepare("INSERT INTO products (product_name,product_category,product_discount,product_price,created_at,product_img) VALUES (?,?,?,?,now(),?)");
+                    $stmt -> execute(array($productName,$productCategory,$productDiscount,$productPrice,$avatar));
+                    header("location:products.php?do=add");
+                }
+                else
+                {
+                    foreach($formErrors as $error)
+                    {
+                        echo $error . "<br>";
+                        exit();
+                    }
+                }
+                
+            }
+            else
+            {
+                header("location:products.php");
             }
         ?>
 
@@ -110,28 +167,31 @@ else
         <?php if($count == 1):?>
             <div class="container">
 
-            <h1 class="text-center">Edit Product</h1>
+            <h1 class="text-center"><?php echo $lang['EditProduct']?></h1>
 
-            <form method="post" action="?do=update">
+            <form method="post" action="?do=update" enctype="multipart/form-data">
     <div class="mb-3">
     <input type="hidden" class="form-control" value="<?= $product['product_id']?>" name="productID">
-    <label for="exampleInputEmail1" class="form-label">Product Name</label>
+    <label for="exampleInputEmail1" class="form-label"><?php echo $lang['ProductName'];?></label>
     <input type="text" class="form-control" value="<?= $product['product_name']?>" name="productName">
 </div>
 <div class="mb-3">
-    <label for="exampleInputEmail1" class="form-label">Product Category</label> 
+    <label for="exampleInputEmail1" class="form-label"><?php echo $lang['ProductCategory'];?></label> 
     <input type="text" class="form-control" value="<?= $product['product_category']?>" name="productcategory">
 </div>
 <div class="mb-3">
-    <label for="exampleInputEmail1" class="form-label">Product Price</label> 
+    <label for="exampleInputEmail1" class="form-label"><?php echo $lang['ProductPrice']?></label> 
     <input type="text" class="form-control" value="<?= $product['product_price']?>" name="productprice">
 </div>
 <div class="mb-3">
-    <label for="exampleInputPassword1" class="form-label">Product Discount</label>
+    <label for="exampleInputPassword1" class="form-label"><?php echo $lang['ProductDiscount'];?></label>
     <input type="text" class="form-control" id="exampleInputPassword1" name="newdiscount">
     <input type="hidden" class="form-control" id="exampleInputPassword1" value="<?= $product['product_discount']?>" name="olddiscount">
 </div>
-
+<div class="mb-3">
+    <label for="formFile" class="form-label"><?php echo $lang['UPLOAD']?></label>
+    <input class="form-control" type="file" id="formFile" name="avatar">
+</div>
 <button type="submit" class="btn btn-primary">Update</button>
 </form>
 </div>
@@ -145,9 +205,19 @@ else
                     $productName =$_POST['productName'];
                     $productCategory =$_POST['productcategory'];
                     $productPrice =$_POST['productprice'];
+                    $ImageName = $_FILES['avatar']['name'];
+                    $ImageType = $_FILES['avatar']['type'];
+                    $ImageTmpName = $_FILES['avatar']['tmp_name'];
+                    $imageAllowedExtension = array("image/jpg" , "image/jpeg" , "image/png");
+                if(in_array($ImageType , $imageAllowedExtension))
+                {
+                    $avatar = rand(0 , 1000)."_".$ImageName;
+                    $destination = "public\image\uploads\products\\".$avatar;
+                    move_uploaded_file($ImageTmpName , $destination);
+                }
                     $productDiscount =empty($_POST['newdiscount']) ? $_POST['olddiscount'] : $_POST['newdiscount'];
-                    $stmt = $con -> prepare("UPDATE products SET product_name=? , product_category=? , product_discount=? , product_price=? WHERE product_id=?");
-                    $stmt -> execute(array($productName , $productCategory , $productDiscount , $productPrice , $productID));
+                    $stmt = $con -> prepare("UPDATE products SET product_name=? , product_category=? , product_discount=? , product_price=?, product_img=? WHERE product_id=?");
+                    $stmt -> execute(array($productName , $productCategory , $productDiscount , $productPrice , $avatar , $productID));
                     header("location:products.php");
                 }
             ?>
@@ -157,7 +227,7 @@ else
                 $productID = $_GET["productID"];
                 $stmt = $con -> prepare("DELETE FROM products WHERE product_id=?");
                 $stmt -> execute(array($productID));
-                header("location:members.php");
+                header("location:products.php");
             ?>
         <?php elseif($do == "show"):?>
             <?php 

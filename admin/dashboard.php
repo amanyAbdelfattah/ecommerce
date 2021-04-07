@@ -10,12 +10,11 @@
             <div class="col-lg-4">
                 <div class="members">
                     <i class="fas fa-users"></i>
-                    <?php echo countItem()?>
+                    <?php echo countItem("user_id","users","users")?>
                 </div>
                 <div class="products">
                     <i class="fas fa-cart-plus"></i>
-                    <?php echo countItem()?>
-                    
+                    <?php echo countItem("product_discount","products")?>
                 </div>
             </div>
         </div>

@@ -39,6 +39,7 @@ else
         <table class="table">
 <thead>
     <tr>
+        <th scope="col"><?php echo $lang['Member Photo'];?></th>
         <th scope="col"><?php echo $lang['UserName'];?></th>
         <th scope="col"><?php echo $lang['EMAIL'];?></th>
         <th scope="col"><?php echo $lang['CreatedAT'];?></th>
@@ -49,6 +50,9 @@ else
 <?php foreach($rows as $row):?>
     <tr>
         <!-- php echo IS THE SAME AS = -->
+        <th scope="row">
+            <img style="height:15vh" src="public\image\uploads\members\<?= $row["path"]?>" alt="<?= $row["path"]?>">
+            </th>
         <th scope="row"><?= $row["username"]?></th>
         <td><?= $row["email"]?></td>
         <td><?= $row["created_at"]?></td> <!--we use timestamp type to -->
@@ -69,7 +73,7 @@ else
     <?php elseif($do == "add"):?>
         <div class="container">
             <h1 class="text-center"><?php echo $lang['AddMembers'];?></h1>
-    <form method="post" action="?do=insert">
+    <form method="post" action="?do=insert" enctype="multipart/form-data">
     <div class="mb-3">
         <label class="form-label"><?php echo $lang['UserName'];?></label>
         <input type="text" class="form-control" name="username">
@@ -86,6 +90,10 @@ else
         <label for="exampleInputEmail1" class="form-label"><?php echo $lang['FULLNAME'];?></label>
         <input type="text" class="form-control" name="fullname">
     </div>
+    <div class="mb-3">
+        <label for="formFile" class="form-label"><?php echo $lang['UPLOAD']?></label>
+        <input class="form-control" type="file" id="formFile" name="avatar">
+    </div>
     <button type="submit" class="btn btn-primary"><?php echo $lang['SUBMIT'];?></button>
 </form>
 </div>
@@ -94,13 +102,72 @@ else
         <?php 
             if($_SERVER['REQUEST_METHOD'] == "POST")
             {
+                // $avatar = $_FILES['avatar'];
+                $avatarName = $_FILES['avatar']['name'];
+                $avatarType = $_FILES['avatar']['type'];
+                $avatarTmpName = $_FILES['avatar']['tmp_name'];
+                $avatarError = $_FILES['avatar']['error'];
+                $avatarSize = $_FILES['avatar']['size'];
+                // echo "<pre>";
+                // print_r($avatar);
+                // echo "</pre>";
+                $avatarAllowedExtension = array("image/jpeg" , "image/png" , "image/jpg");
+                if(in_array($avatarType , $avatarAllowedExtension))
+                {
+                    $avatar = rand(0 , 1000)."_".$avatarName;
+                    $destination = "public\image\uploads\members\\".$avatar;
+                    move_uploaded_file($avatarTmpName , $destination);
+                }
                 $username = $_POST['username'];
                 $email = $_POST['email'];
                 $password = sha1($_POST['password']);
                 $fullname = $_POST['fullname'];
-                $stmt=$con->prepare("INSERT INTO users (username,password,email,fullname,groupid,created_at) VALUES (?,?,?,?,0,now())");
-                $stmt->execute(array($username,$password,$email,$fullname));
-                header("location:members.php?do=add");
+                // start back-end validation
+                $formErrors = array();
+                if(empty($username))
+                {
+                    $formErrors[] = "<h1>" . "Username must not be empty" . "</h1>";
+                }
+                //Try to user || (strlen($username)<4) but For best practice to only print one condition if the input is empty or less than 4 characters use elseif
+                elseif(strlen($username) < 4)
+                {
+                    $formErrors[] = "<h1>" . "Sorry, Username must not be less then 4 characters" . "</h1>";
+                }
+                elseif(empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL))
+                {
+                    $formErrors[] = "<h1>" . "Please enter your email in a valid manner" . "</h1>";
+                }
+                elseif(empty($password))
+                {
+                    $formErrors[] = "<h1>" . "Please enter your password" . "</h1>";
+                }
+                elseif(empty($fullname))
+                {
+                    $formErrors[] = "<h1>" . "Please enter your fullname" . "</h1>";
+                }
+                elseif(empty($avatar))
+                {
+                    $formErrors[] = "<h1>" . "Please upload your photo" . "</h1>";
+                }
+                if(empty($formErrors))
+                {
+                    $stmt=$con->prepare("INSERT INTO users (username,password,email,fullname,groupid,created_at,path) VALUES (?,?,?,?,0,now(),?)");
+                    $stmt->execute(array($username,$password,$email,$fullname,$avatar));
+                    header("location:members.php?do=add");
+                }
+                else
+                {
+                    foreach($formErrors as $error)
+                    {
+                        echo $error . "<br>";
+                        exit();
+                    } 
+                }
+                // end back-end validation
+            }
+            else
+            {
+                header("location:members.php");
             }
         ?>
     <?php elseif($do == "edit"):?>
@@ -113,33 +180,36 @@ else
         ?>
         <?php if($count == 1):?>
         <div class="container">
-            <h1 class="text-center">Edit Member</h1>
-            <form method="post" action="?do=update">
+            <h1 class="text-center"><?php echo $lang['EditMembers']?></h1>
+            <form method="post" action="?do=update" enctype="multipart/form-data">
     <div class="mb-3">
     <input type="hidden" class="form-control" value="<?= $row['user_id']?>" name="userid">
-    <label for="exampleInputEmail1" class="form-label">Username</label>
+    <label for="exampleInputEmail1" class="form-label"><?php echo $lang['UserName'];?></label>
     <input type="text" class="form-control" value="<?= $row['username']?>" name="username">
 </div>
 <div class="mb-3">
-    <label for="exampleInputPassword1" class="form-label">Password</label>
+    <label for="exampleInputPassword1" class="form-label"><?php echo $lang['PASSWORD'];?></label>
     <input type="password" class="form-control" id="exampleInputPassword1" name="newpassword">
     <input type="hidden" class="form-control" id="exampleInputPassword1" value="<?= $row['password']?>" name="oldpassword">
 </div>
 <div class="mb-3">
-    <label for="exampleInputPassword1" class="form-label">Group ID</label>
+    <label for="exampleInputPassword1" class="form-label"><?php echo $lang['GROUPID'];?></label>
     <input type="password" class="form-control" id="exampleInputPassword1" name="newgroupid">
     <input type="hidden" class="form-control" id="exampleInputPassword1" value="<?= $row['groupid']?>" name="oldgroupid">
 </div>
 <div class="mb-3">
-    <label for="exampleInputEmail1" class="form-label">Email</label> 
+    <label for="exampleInputEmail1" class="form-label"><?php echo $lang['EMAIL'];?></label> 
     <input type="email" class="form-control" value="<?= $row['email']?>" name="email">
 </div>
 <div class="mb-3">
-    <label for="exampleInputEmail1" class="form-label">Fullname</label>
+    <label for="exampleInputEmail1" class="form-label"><?php echo $lang['FULLNAME'];?></label>
     <input type="text" class="form-control" value="<?= $row['fullname']?>" name="fullname">
 </div>
-
-<button type="submit" class="btn btn-primary">Update</button>
+<div class="mb-3">
+    <label for="formFile" class="form-label"><?php echo $lang['UPLOAD']?></label>
+    <input class="form-control" type="file" id="formFile" name="avatar">
+</div>
+<button type="submit" class="btn btn-primary"><?php echo $lang['Update'];?></button>
 </form>
 </div>
         <?php endif?>
@@ -151,11 +221,21 @@ else
                 $username = $_POST["username"];
                 $email = $_POST["email"];
                 $fullname = $_POST["fullname"];
+                $avatarName = $_FILES['avatar']['name'];
+                $avatarType = $_FILES['avatar']['type'];
+                $avatarTmpName = $_FILES['avatar']['tmp_name'];
+                $avatarAllowedExtension = array("image/png" , "image/jpg" , "image/jpeg");
+                if(in_array($avatarType , $avatarAllowedExtension))
+                {
+                    $avatar = rand(0 , 1000)."_".$avatarName;
+                    $destination = "public\image\uploads\members\\".$avatar;
+                    move_uploaded_file($avatarTmpName , $destination);
+                }
                 $groupID = empty($_POST['newgroupid']) ? $_POST['oldgroupid'] : $_POST['newgroupid'];
                 $password = empty($_POST['newpassword']) ? $_POST['oldpassword'] : $_POST['newpassword'];
                 $hashedPass = sha1($password);
-                $stmt = $con -> prepare("UPDATE users SET username=? , password=?, email=? , fullname=?, groupid=? WHERE user_id=?");
-                $stmt -> execute(array($username , $hashedPass , $email , $fullname , $groupID , $userid));
+                $stmt = $con -> prepare("UPDATE users SET username=? , password=?, email=? , fullname=?, groupid=?, path=? WHERE user_id=?");
+                $stmt -> execute(array($username , $hashedPass , $email , $fullname , $groupID , $avatar , $userid));
                 header("location:members.php");
             }
         ?>

@@ -20,16 +20,16 @@
 		$lang = 'en';
 	}
 	switch ($lang) {
-		  case 'en':
-		  $lang_file = 'langEn.php';
-		  break;
+		case 'en':
+		$lang_file = 'langEn.php';
+		break;
 
-		  case 'ar':
-		  $lang_file = 'langArab.php';
-		  break;
+		case 'ar':
+		$lang_file = 'langArab.php';
+		break;
 
-		  default:
-		  $lang_file = 'langEn.php';
+		default:
+		$lang_file = 'langEn.php';
 
 	}
 
