@@ -22,8 +22,14 @@ else
     <?php if($do == "manage"):?>
     <!--Start all members page-->
     <?php 
+        //start pagenation
+        $recorded_per_page = 5;
+        $page = isset($_GET['page']) ? $_GET['page'] : 1;
+        $start_From = ($page-1)*$recorded_per_page;
+        
+        //end pagenation
         // Select All From Database
-        $stmt=$con->prepare("SELECT * FROM users WHERE groupid=0");
+        $stmt=$con->prepare("SELECT * FROM users WHERE groupid=0 LIMIT $start_From , $recorded_per_page");
         $stmt->execute();
         $rows = $stmt->fetchAll();
         // echo "<pre>";
@@ -51,7 +57,7 @@ else
     <tr>
         <!-- php echo IS THE SAME AS = -->
         <th scope="row">
-            <img style="height:15vh" src="public\image\uploads\members\<?= $row["path"]?>" alt="<?= $row["path"]?>">
+            <img style="height:20vh" src="public\image\uploads\members\<?= $row["path"]?>" alt="<?= $row["path"]?>">
             </th>
         <th scope="row"><?= $row["username"]?></th>
         <td><?= $row["email"]?></td>
@@ -67,6 +73,26 @@ else
 <?php endforeach?>
 </tbody>
 </table>
+<!--Start paginate counter-->
+<?php 
+    $stmt = $con -> prepare("SELECT * FROM users WHERE groupid=0 ORDER BY user_id DESC");
+    $stmt -> execute();
+    $total_recorded = $stmt -> rowCount();
+    // ceil : function to approximate float to integer
+    $total_page = ceil($total_recorded / $recorded_per_page);
+
+    $start_loop = 1;
+    $end_loop = $total_page;
+
+?>
+<nav aria-label="Page navigation example">
+<ul class="pagination justify-content-center">
+<?php for($i = $start_loop; $i <= $end_loop; $i++):?>
+    <li class="page-item"><a class="page-link" style="font-size: 25px" href="?do=manage&page=<?= $i?>"><?= $i?></a></li>
+    <?php endfor?>
+</ul>
+</nav>
+<!--End paginate counter-->
     </div>
         <!--End all members page-->
 
@@ -172,6 +198,7 @@ else
         ?>
     <?php elseif($do == "edit"):?>
         <?php
+        
         $userid = isset($_GET['userid']) && is_numeric($_GET['userid']) ? intval($_GET['userid']) : 0;
         $stmt = $con -> prepare("SELECT * FROM users WHERE user_id = ?");
         $stmt -> execute(array($userid));

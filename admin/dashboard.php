@@ -14,7 +14,7 @@
                 </div>
                 <div class="products">
                     <i class="fas fa-cart-plus"></i>
-                    <?php echo countItem("product_discount","products")?>
+                    <?php echo countItem("product_discount","products","products")?>
                 </div>
             </div>
         </div>

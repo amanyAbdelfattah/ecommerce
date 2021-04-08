@@ -21,7 +21,7 @@
             <?php echo $_SESSION['FULL_NAME']?>
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" href="#">Action</a></li>
+            <li><a class="dropdown-item" href="?do=edit&userid=<?= $_SESSION['USER_ID'] ?>">Profile</a></li>
             <li><a class="dropdown-item" href="#">Another action</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="logout.php"><?php echo $lang['LOGOUT'];?></a></li>
