@@ -17,7 +17,10 @@ else
 
         <?php if($do == "manage"):?>
         <?php
-            $stmt = $con->prepare("SELECT * FROM products WHERE product_discount=10");
+            $show_per_page = 5;
+            $page = isset($_GET['page']) ? $_GET['page'] : 1;
+            $start_from = ($page-1) * $show_per_page;
+            $stmt = $con->prepare("SELECT * FROM products WHERE product_discount=10 LIMIT $start_from , $show_per_page");
             $stmt -> execute();
             $products = $stmt->fetchAll();
         ?>
@@ -48,20 +51,37 @@ else
         <td><?= $product['product_price']?></td>
         <td><?= $product['created_at']?></td>
         <td>
-            <a class="btn btn-info m-1" href="?do=show&productID=<?= $product['product_id']?>" title="Show">
+            <a class="btn btn-info m-1" href="?do=show&productID=<?= $product['product_id']?>" title="<?php echo $lang['SHOW'];?>">
                 <i class="fas fa-eye"></i>
             </a>
-            <a class="btn btn-warning m-1" href="?do=edit&productID=<?= $product['product_id']?>" title="Edit">
+            <?php if($_SESSION['GROUP_ID'] == 1):?>
+            <a class="btn btn-warning m-1" href="?do=edit&productID=<?= $product['product_id']?>" title="<?php echo $lang['EDIT'];?>">
                 <i class="fas fa-edit"></i></a>
             </a>
-            <a class="btn btn-danger m-1" href="?do=delete&productID=<?= $product['product_id']?>" title="Delete">
+            <a class="btn btn-danger m-1" href="?do=delete&productID=<?= $product['product_id']?>" title="<?php echo $lang['Delete'];?>">
                 <i class="fas fa-trash"></i>
             </a>
+            <?php endif?>
         </td>
     </tr>
     <?php endforeach?>
     </tbody>
 </table>
+<?php 
+    $stmt = $con -> prepare("SELECT * FROM products WHERE product_discount=10 ORDER BY product_id DESC");
+    $stmt -> execute();
+    $products_recorded = $stmt -> rowCount();
+    $total_page = ceil($products_recorded / $show_per_page);
+    $start_loop = 1;
+    $end_loop = $total_page;
+?>
+<nav aria-label="Page navigation example">
+<ul class="pagination justify-content-center">
+<?php for($i = $start_loop; $i <= $end_loop; $i++):?>
+    <li class="page-item"><a class="page-link" style="font-size: 25px" href="?do=manage&page=<?= $i?>"><?= $i?></a></li>
+    <?php endfor?>
+</ul>
+</nav>
         </div>
 
         <?php elseif($do == "add"):?>

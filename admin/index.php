@@ -9,7 +9,7 @@ if($_SERVER['REQUEST_METHOD'] == "POST")
     $adminUsername = $_POST['adminusername'];
     $adminPassword = $_POST['adminpassword'];
     $hasedPass = sha1($adminPassword);
-    $stmt = $con->prepare("SELECT * FROM users WHERE username=? AND password=? AND groupid=1");
+    $stmt = $con->prepare("SELECT * FROM users WHERE username=? AND password=? AND groupid !=0");
     $stmt->execute(array($adminUsername , $hasedPass));
     /* rowCount() -> Boolen function to check if user is existed or not*/
     $count = $stmt->rowCount();

@@ -66,8 +66,14 @@ else
             <a class="btn btn-info m-1" href="?do=show&userid=<?= $row['user_id']?>" title="<?php echo $lang['SHOW'];?>">
                 <i class="fas fa-eye"></i>
             </a>
-            <a class="btn btn-warning m-1" href="?do=edit&userid=<?= $row['user_id']?>" title="<?php echo $lang['EDIT'];?>"><i class="fas fa-edit"></i></a>
-            <a class="btn btn-danger m-1" href="?do=delete&userid=<?= $row['user_id']?>" title="<?php echo $lang['Delete'];?>"><i class="fas fa-trash"></i></a>
+            <?php if($_SESSION['GROUP_ID'] == 1):?>
+            <a class="btn btn-warning m-1" href="?do=edit&userid=<?= $row['user_id']?>" title="<?php echo $lang['EDIT'];?>">
+                <i class="fas fa-edit"></i>
+            </a>
+            <a class="btn btn-danger m-1" href="?do=delete&userid=<?= $row['user_id']?>" title="<?php echo $lang['Delete'];?>">
+                <i class="fas fa-trash"></i>
+            </a>
+            <?php endif?>
         </td>
     </tr>
 <?php endforeach?>

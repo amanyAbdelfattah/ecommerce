@@ -8,10 +8,6 @@ footer
     text-align: center;
     background-color: currentColor;
 }
-a
-{
-    font-size: 20px;
-}
 footer a
 {
     text-decoration: none;
@@ -28,6 +24,18 @@ footer a:first-of-type::after
 .members, .products
 {
     color:blue;
-    font-size:20px;
-    margin-bottom:20px
+    font-size:30px;
+    margin-top:20px;
+}
+.members a, .products a
+{
+    text-decoration: none;
+    text-decoration: none;
+    background-color: #212529;
+    padding: 10px;
+    transition: all .2s ease-in-out;
+}
+.members a:hover, .products a:hover
+{
+    color: white;
 }
