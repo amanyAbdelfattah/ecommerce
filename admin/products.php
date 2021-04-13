@@ -20,7 +20,7 @@ else
             $show_per_page = 5;
             $page = isset($_GET['page']) ? $_GET['page'] : 1;
             $start_from = ($page-1) * $show_per_page;
-            $stmt = $con->prepare("SELECT * FROM products WHERE product_discount=10 LIMIT $start_from , $show_per_page");
+            $stmt = $con->prepare("SELECT products.* , categories.cat_name FROM products INNER JOIN categories ON categories.cat_id=products.cat_id LIMIT $start_from , $show_per_page");
             $stmt -> execute();
             $products = $stmt->fetchAll();
         ?>
@@ -47,7 +47,7 @@ else
         <img style="height: 15vh;" src="public\image\uploads\products\<?= $product['product_img']?>" alt="<?= $product['product_img']?>">
         </th>
         <th scope="row"><?= $product['product_name']?></th>
-        <td><?= $product['product_category']?></td>
+        <td><?= $product['cat_name']?></td>
         <td><?= $product['product_price']?></td>
         <td><?= $product['created_at']?></td>
         <td>
@@ -93,10 +93,11 @@ else
         <label for="exampleInputEmail1" class="form-label"><?php echo $lang['ProductName'];?></label>
         <input type="text" class="form-control" name="productName">
     </div>
-    <div class="mb-3">
-        <label class="form-label"><?php echo $lang['ProductCategory'];?></label>
-        <input type="text" class="form-control" name="productCategory">
-    </div>
+    <?php 
+        $stmt = $con -> prepare("SELECT * FROM categories");
+        $stmt -> execute();
+        $products = $stmt -> fetchAll();
+    ?>
     <div class="mb-3">
         <label class="form-label"><?php echo $lang['ProductDiscount'];?></label>
         <input type="text" class="form-control" name="productDiscount">
@@ -104,6 +105,14 @@ else
     <div class="mb-3">
         <label class="form-label"><?php echo $lang['ProductPrice']?></label>
         <input type="text" class="form-control" name="productPrice">
+    </div>
+    <div class="mb-3">
+    <select class="form-select" aria-label="Default select example" name="productCategory">
+        <option selected>Select Category</option>
+        <?php foreach($products as $product):?>
+        <option value="<?= $product['cat_id']?>"><?= $product['cat_name']?></option>
+        <?php endforeach?>
+    </select>
     </div>
     <div class="mb-3">
         <label for="formFile" class="form-label">Upload Product Image</label>
@@ -156,7 +165,7 @@ else
                 }
                 if(empty($formErrors))
                 {
-                    $stmt = $con -> prepare("INSERT INTO products (product_name,product_category,product_discount,product_price,created_at,product_img) VALUES (?,?,?,?,now(),?)");
+                    $stmt = $con -> prepare("INSERT INTO products (product_name,cat_id,product_discount,product_price,created_at,product_img) VALUES (?,?,?,?,now(),?)");
                     $stmt -> execute(array($productName,$productCategory,$productDiscount,$productPrice,$avatar));
                     header("location:products.php?do=add");
                 }
@@ -197,15 +206,15 @@ else
 </div>
 <div class="mb-3">
     <label for="exampleInputEmail1" class="form-label"><?php echo $lang['ProductCategory'];?></label> 
-    <input type="text" class="form-control" value="<?= $product['product_category']?>" name="productcategory">
+    <input type="text" class="form-control" value="<?= $product['cat_id']?>" name="productcategory">
 </div>
 <div class="mb-3">
     <label for="exampleInputEmail1" class="form-label"><?php echo $lang['ProductPrice']?></label> 
-    <input type="text" class="form-control" value="<?= $product['product_price']?>" name="productprice">
+    <input type="number" class="form-control" value="<?= $product['product_price']?>" name="productprice">
 </div>
 <div class="mb-3">
     <label for="exampleInputPassword1" class="form-label"><?php echo $lang['ProductDiscount'];?></label>
-    <input type="text" class="form-control" id="exampleInputPassword1" name="newdiscount">
+    <input type="number" class="form-control" id="exampleInputPassword1" name="newdiscount">
     <input type="hidden" class="form-control" id="exampleInputPassword1" value="<?= $product['product_discount']?>" name="olddiscount">
 </div>
 <div class="mb-3">
@@ -236,7 +245,7 @@ else
                     move_uploaded_file($ImageTmpName , $destination);
                 }
                     $productDiscount =empty($_POST['newdiscount']) ? $_POST['olddiscount'] : $_POST['newdiscount'];
-                    $stmt = $con -> prepare("UPDATE products SET product_name=? , product_category=? , product_discount=? , product_price=?, product_img=? WHERE product_id=?");
+                    $stmt = $con -> prepare("UPDATE products SET product_name=? , cat_id=? , product_discount=? , product_price=?, product_img=? WHERE product_id=?");
                     $stmt -> execute(array($productName , $productCategory , $productDiscount , $productPrice , $avatar , $productID));
                     header("location:products.php");
                 }

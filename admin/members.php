@@ -177,7 +177,7 @@ else
                 {
                     $formErrors[] = "<h1>" . "Please enter your fullname" . "</h1>";
                 }
-                elseif(empty($avatar))
+                elseif($avatarError = 0)
                 {
                     $formErrors[] = "<h1>" . "Please upload your photo" . "</h1>";
                 }
